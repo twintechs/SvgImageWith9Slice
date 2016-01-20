@@ -49,4 +49,10 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lib\Xamarin.Forms.Plugins\SVG\SVG\SVG.Forms.Plugin.Abstractions\SVG.Forms.Plugin.Abstractions.csproj">
+      <Project>{14C534B6-1984-41A9-A384-D3A5508588E3}</Project>
+      <Name>SVG.Forms.Plugin.Abstractions</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

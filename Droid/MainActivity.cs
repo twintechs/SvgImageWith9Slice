@@ -7,6 +7,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using SVG.Forms.Plugin.Droid;
 
 namespace SvgSliceSpike.Droid
 {
@@ -18,6 +19,7 @@ namespace SvgSliceSpike.Droid
 			base.OnCreate (bundle);
 
 			global::Xamarin.Forms.Forms.Init (this, bundle);
+            SvgImageRenderer.Init();
 
 			LoadApplication (new App ());
 		}

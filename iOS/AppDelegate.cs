@@ -4,6 +4,7 @@ using System.Linq;
 
 using Foundation;
 using UIKit;
+using SVG.Forms.Plugin.iOS;
 
 namespace SvgSliceSpike.iOS
 {
@@ -15,6 +16,7 @@ namespace SvgSliceSpike.iOS
 			global::Xamarin.Forms.Forms.Init ();
 
 			LoadApplication (new App ());
+            SvgImageRenderer.Init();
 
 			return base.FinishedLaunching (app, options);
 		}

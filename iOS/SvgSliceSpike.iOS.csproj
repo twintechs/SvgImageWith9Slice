@@ -97,6 +97,14 @@
       <Project>{F5FE9868-2792-420E-A467-18A0CB08C381}</Project>
       <Name>SvgSliceSpike</Name>
     </ProjectReference>
+    <ProjectReference Include="..\lib\Xamarin.Forms.Plugins\SVG\SVG\SVG.Forms.Plugin.iOS\SVG.Forms.Plugin.iOS.csproj">
+      <Project>{D525F236-6A2D-4010-B1CC-4A4B8581C90B}</Project>
+      <Name>SVG.Forms.Plugin.iOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\Xamarin.Forms.Plugins\SVG\SVG\SVG.Forms.Plugin.Abstractions\SVG.Forms.Plugin.Abstractions.csproj">
+      <Project>{14C534B6-1984-41A9-A384-D3A5508588E3}</Project>
+      <Name>SVG.Forms.Plugin.Abstractions</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Resources\Images.xcassets\AppIcons.appiconset\Contents.json" />
