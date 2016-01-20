@@ -55,4 +55,10 @@
       <Name>SVG.Forms.Plugin.Abstractions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\twintechs-logo.svg" />
+  </ItemGroup>
 </Project>

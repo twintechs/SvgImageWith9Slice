@@ -1,6 +1,7 @@
-﻿using System;
+﻿using System.Reflection;
 
 using Xamarin.Forms;
+using SVG.Forms.Plugin.Abstractions;
 
 namespace SvgSliceSpike
 {
@@ -13,12 +14,14 @@ namespace SvgSliceSpike
 				Content = new StackLayout {
 					VerticalOptions = LayoutOptions.Center,
 					Children = {
-						new Label {
-							XAlign = TextAlignment.Center,
-							Text = "Welcome to Xamarin Forms!"
-						}
-					}
-				}
+                        new SvgImage() {
+                            SvgPath = "SvgSliceSpike.Assets.twintechs-logo.svg",
+                            SvgAssembly = typeof(App).GetTypeInfo().Assembly, 
+                            HeightRequest = 100,
+                            WidthRequest = 100
+                        },
+					},
+				},
 			};
 		}
 
