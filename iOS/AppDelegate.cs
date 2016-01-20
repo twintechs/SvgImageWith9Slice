@@ -6,20 +6,17 @@ using Foundation;
 using UIKit;
 using SVG.Forms.Plugin.iOS;
 
-namespace SvgSliceSpike.iOS
-{
-	[Register ("AppDelegate")]
-	public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate
-	{
-		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
-		{
-			global::Xamarin.Forms.Forms.Init ();
+namespace SvgSliceSpike.iOS {
+    [Register("AppDelegate")]
+    public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate {
+        public override bool FinishedLaunching(UIApplication app, NSDictionary options) {
+            global::Xamarin.Forms.Forms.Init();
 
-			LoadApplication (new App ());
+            LoadApplication(new App());
             SvgImageRenderer.Init();
 
-			return base.FinishedLaunching (app, options);
-		}
-	}
+            return base.FinishedLaunching(app, options);
+        }
+    }
 }
 

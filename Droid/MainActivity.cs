@@ -9,20 +9,17 @@ using Android.Widget;
 using Android.OS;
 using SVG.Forms.Plugin.Droid;
 
-namespace SvgSliceSpike.Droid
-{
-	[Activity (Label = "SvgSliceSpike.Droid", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity
-	{
-		protected override void OnCreate (Bundle bundle)
-		{
-			base.OnCreate (bundle);
+namespace SvgSliceSpike.Droid {
+    [Activity(Label = "SvgSliceSpike.Droid", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity {
+        protected override void OnCreate(Bundle bundle) {
+            base.OnCreate(bundle);
 
-			global::Xamarin.Forms.Forms.Init (this, bundle);
+            global::Xamarin.Forms.Forms.Init(this, bundle);
             SvgImageRenderer.Init();
 
-			LoadApplication (new App ());
-		}
-	}
+            LoadApplication(new App());
+        }
+    }
 }
 
