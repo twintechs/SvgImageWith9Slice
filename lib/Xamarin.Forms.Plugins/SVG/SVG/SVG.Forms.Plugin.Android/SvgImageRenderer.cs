@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 using Android.Runtime;
 using NGraphics.Android.Custom;
 using NGraphics.Custom.Parsers;
+using Color = NGraphics.Custom.Models.Color;
+using Size = NGraphics.Custom.Models.Size;
+using Rect = NGraphics.Custom.Models.Rect;
+using NGraphics.Custom.Codes;
 
 [assembly: ExportRenderer (typeof(SvgImage), typeof(SvgImageRenderer))]
 namespace SVG.Forms.Plugin.Droid
@@ -48,6 +52,8 @@ namespace SVG.Forms.Plugin.Droid
 
           var graphics = r.Graphic;
 
+            var originalSvgSize = graphics.Size;
+
           var width = PixelToDP((int)_formsControl.WidthRequest <= 0 ? 100 : (int)_formsControl.WidthRequest);
           var height = PixelToDP((int)_formsControl.HeightRequest <= 0 ? 100 : (int)_formsControl.HeightRequest);
 
@@ -62,10 +68,38 @@ namespace SVG.Forms.Plugin.Droid
             scale = width / graphics.Size.Width;
           }
 
-          var canvas = new AndroidPlatform().CreateImageCanvas(graphics.Size, scale);
-          graphics.Draw(canvas);
-          var image = (BitmapImage)canvas.GetImage();
+            var finalCanvas = new AndroidPlatform().CreateImageCanvas(graphics.Size, scale);
 
+            // TEMP: Fill for canvas visiblity.
+            // TODO: Remove this.
+            finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
+            if (_formsControl.Svg9SliceInsets != ResizableSvgInsets.Zero)
+            {
+              // Doing a stretchy 9-slice manipulation on the original SVG.
+
+              graphics.ViewBox = new Rect(0, 0, originalSvgSize.Width, originalSvgSize.Height);
+              // Fails, but feels right to me.
+              //        graphics.ViewBox = new Rect(0, 0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0);
+              var partialSize1 = new Size(graphics.Size.Width / 2.0, graphics.Size.Height / 2.0);
+              var partialCanvas1 = new AndroidPlatform().CreateImageCanvas(partialSize1, scale);
+              graphics.Draw(partialCanvas1);
+              finalCanvas.DrawImage(partialCanvas1.GetImage(), new Rect(0, 0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0));
+
+              graphics.ViewBox = new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width, originalSvgSize.Height);
+              // Fails, but feels right to me.
+              //        graphics.ViewBox = new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0);
+              var partialSize2 = new Size(graphics.Size.Width / 2.0, graphics.Size.Height / 2.0);
+              var partialCanvas2 = new AndroidPlatform().CreateImageCanvas(partialSize2, scale);
+              graphics.Draw(partialCanvas2);
+              finalCanvas.DrawImage(partialCanvas2.GetImage(), new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0));
+            }
+            else
+            {
+              // Typical approach to rendering an SVG; just draw it to the canvas.
+              graphics.Draw(finalCanvas);
+            }
+
+            var image = (BitmapImage)finalCanvas.GetImage();
           return image;
         }).ContinueWith(taskResult =>
         {
@@ -85,7 +119,7 @@ namespace SVG.Forms.Plugin.Droid
 
 		public override SizeRequest GetDesiredSize (int widthConstraint, int heightConstraint)
 		{
-			return new SizeRequest (new Size (_formsControl.WidthRequest, _formsControl.WidthRequest));
+			return new SizeRequest (new Xamarin.Forms.Size (_formsControl.WidthRequest, _formsControl.WidthRequest));
 		}
 
     /// <summary>

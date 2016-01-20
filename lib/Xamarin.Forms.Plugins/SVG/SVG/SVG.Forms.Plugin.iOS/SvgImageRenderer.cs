@@ -72,26 +72,41 @@ namespace SVG.Forms.Plugin.iOS
           }
 
 
-          var scaleFactor = UIScreen.MainScreen.Scale;
-        var finalCanvas = new ApplePlatform().CreateImageCanvas(graphics.Size, scale*scaleFactor);
-
+        var scaleFactor = UIScreen.MainScreen.Scale;
+        var finalCanvas = new ApplePlatform().CreateImageCanvas(graphics.Size, scale * scaleFactor);
+        
         // TEMP: Fill for canvas visiblity.
+        // TODO: Remove this.
         finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
+        
+        if (_formsControl.Svg9SliceInsets != ResizableSvgInsets.Zero)
+        {
+          // Doing a stretchy 9-slice manipulation on the original SVG.
+          // TODO: Partition into 9 segments, based on _formsControl.Svg9SliceInsets
+          // TODO: Redraw into final version with proportions based on those segments
+          
+          graphics.ViewBox = new Rect(0, 0, originalSvgSize.Width, originalSvgSize.Height);
+          // Fails, but feels right to me.
+          //        graphics.ViewBox = new Rect(0, 0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0);
+          var partialSize1 = new Size(graphics.Size.Width / 2.0, graphics.Size.Height / 2.0);
+          var partialCanvas1 = new ApplePlatform().CreateImageCanvas(partialSize1, scale * scaleFactor);
+          graphics.Draw(partialCanvas1);
+          finalCanvas.DrawImage(partialCanvas1.GetImage(), new Rect(0, 0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0));
+          
+          graphics.ViewBox = new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width, originalSvgSize.Height);
+          // Fails, but feels right to me.
+          //        graphics.ViewBox = new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0);
+          var partialSize2 = new Size(graphics.Size.Width / 2.0, graphics.Size.Height / 2.0);
+          var partialCanvas2 = new ApplePlatform().CreateImageCanvas(partialSize2, scale * scaleFactor);
+          graphics.Draw(partialCanvas2);
+          finalCanvas.DrawImage(partialCanvas2.GetImage(), new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0));
+        }
+        else
+        {
+          // Typical approach to rendering an SVG; just draw it to the canvas.
+          graphics.Draw(finalCanvas);
+        }
 
-        graphics.ViewBox = new Rect(0, 0, originalSvgSize.Width, originalSvgSize.Height);
-        var partialSize1 = new Size(graphics.Size.Width / 2.0, graphics.Size.Height / 2.0);
-        var partialCanvas1 = new ApplePlatform().CreateImageCanvas(partialSize1, scale*scaleFactor);
-        graphics.Draw(partialCanvas1);
-        finalCanvas.DrawImage(partialCanvas1.GetImage(), new Rect(0, 0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0));
-
-        graphics.ViewBox = new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width, originalSvgSize.Height);
-        var partialSize2 = new Size(graphics.Size.Width / 2.0, graphics.Size.Height / 2.0);
-        var partialCanvas2 = new ApplePlatform().CreateImageCanvas(partialSize2, scale*scaleFactor);
-        graphics.Draw(partialCanvas2);
-        finalCanvas.DrawImage(partialCanvas2.GetImage(), new Rect(originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0, originalSvgSize.Width / 2.0, originalSvgSize.Height / 2.0));
-
-//          var canvas = new ApplePlatform().CreateImageCanvas(graphics.Size, scale*scaleFactor);
-//          graphics.Draw(canvas);
         var image = finalCanvas.GetImage();
 
           var uiImage = image.GetUIImage();
