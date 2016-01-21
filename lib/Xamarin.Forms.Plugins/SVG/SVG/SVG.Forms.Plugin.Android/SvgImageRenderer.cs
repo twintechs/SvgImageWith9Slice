@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 using Android.Widget;
 using SVG.Forms.Plugin.Abstractions;
@@ -112,48 +113,26 @@ namespace SVG.Forms.Plugin.Droid
         // [x] Partition into 9 segments, based on _formsControl.Svg9SliceInsets
         // TODO: Redraw into final version with proportions based on translation between the original and the [potentially-stretched] segments
 
+        var sliceInsets = _formsControl.Svg9SliceInsets;
         var sliceFramePairs = new[] {
-          // Upper left
-          Tuple.Create(
-            new Rect(Point.Zero, originalSvgSize),
-            new Rect(Point.Zero, new Size(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top))),
-          // Upper middle
-          Tuple.Create(
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, 0), originalSvgSize),
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, 0), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top))),
-          // Upper right
-          Tuple.Create(
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, 0), originalSvgSize),
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, 0), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top))),
-          // Middle left
-          Tuple.Create(
-            new Rect(new Point(0, _formsControl.Svg9SliceInsets.Top), originalSvgSize),
-            new Rect(new Point(0, _formsControl.Svg9SliceInsets.Top), new Size(_formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
-          // Center
-          Tuple.Create(
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top), originalSvgSize),
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
-          // Middle right
-          Tuple.Create(
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top), originalSvgSize),
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top), new Size(_formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
-          // Lower left
-          Tuple.Create(
-            new Rect(new Point(0, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), originalSvgSize),
-            new Rect(new Point(0, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(_formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Bottom))),
-          // Lower middle
-          Tuple.Create(
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), originalSvgSize),
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Bottom))),
-          // Lower right
-          Tuple.Create(
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), originalSvgSize),
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(_formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Bottom))),
-        };
+          ResizableSvgSection.TopLeft,
+          ResizableSvgSection.TopCenter,
+          ResizableSvgSection.TopRight,
+          ResizableSvgSection.CenterLeft,
+          ResizableSvgSection.CenterCenter,
+          ResizableSvgSection.CenterRight,
+          ResizableSvgSection.BottomLeft,
+          ResizableSvgSection.BottomCenter,
+          ResizableSvgSection.BottomRight,
+        }.Select(section => {
+          return Tuple.Create(
+            sliceInsets.GetSection(originalSvgSize, section),
+            sliceInsets.ScaleSection(originalSvgSize, outputSize, section));
+        }).ToArray();
 
         foreach (var sliceFramePair in sliceFramePairs) {
-          var upperLeftImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
-          finalCanvas.DrawImage(upperLeftImage, sliceFramePair.Item2);
+          var sliceImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
+          finalCanvas.DrawImage(sliceImage, sliceFramePair.Item2);
         }
       }
       else
