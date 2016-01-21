@@ -101,42 +101,43 @@ namespace SVG.Forms.Plugin.iOS
         // [x] Partition into 9 segments, based on _formsControl.Svg9SliceInsets
         // TODO: Redraw into final version with proportions based on translation between the original and the [potentially-stretched] segments
 
+        var sliceInsets = _formsControl.Svg9SliceInsets;
         var sliceFramePairs = new[] {
           // Upper left
           Tuple.Create(
-            new Rect(Point.Zero, originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.TopLeft),
             new Rect(Point.Zero, new Size(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top))),
           // Upper middle
           Tuple.Create(
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, 0), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.TopCenter),
             new Rect(new Point(_formsControl.Svg9SliceInsets.Left, 0), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top))),
           // Upper right
           Tuple.Create(
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, 0), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.TopRight),
             new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, 0), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top))),
           // Middle left
           Tuple.Create(
-            new Rect(new Point(0, _formsControl.Svg9SliceInsets.Top), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.CenterLeft),
             new Rect(new Point(0, _formsControl.Svg9SliceInsets.Top), new Size(_formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
           // Center
           Tuple.Create(
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.CenterCenter),
             new Rect(new Point(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
           // Middle right
           Tuple.Create(
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.CenterRight),
             new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top), new Size(_formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
           // Lower left
           Tuple.Create(
-            new Rect(new Point(0, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.BottomLeft),
             new Rect(new Point(0, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(_formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Bottom))),
           // Lower middle
           Tuple.Create(
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.BottomCenter),
             new Rect(new Point(_formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Bottom))),
           // Lower right
           Tuple.Create(
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), originalSvgSize),
+            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.BottomRight),
             new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(_formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Bottom))),
         };
 

@@ -1,9 +1,23 @@
 ﻿using System.Reflection;
 using Xamarin.Forms;
 using System;
+using NGraphics.Custom.Models;
+using Point = NGraphics.Custom.Models.Point;
+using Size = NGraphics.Custom.Models.Size;
 
 namespace SVG.Forms.Plugin.Abstractions
 {
+  public enum ResizableSvgSection {
+    TopLeft,
+    TopCenter,
+    TopRight,
+    CenterLeft,
+    CenterCenter,
+    CenterRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight,
+  }
   public struct ResizableSvgInsets : IEquatable<ResizableSvgInsets> {
     public double Top { get; set; }
     public double Right { get; set; }
@@ -19,6 +33,31 @@ namespace SVG.Forms.Plugin.Abstractions
     }
     public ResizableSvgInsets(double vertical, double horizontal) : this(vertical, horizontal, vertical, horizontal) { }
     public ResizableSvgInsets(double allSides) : this(allSides, allSides, allSides, allSides) { }
+
+    public Rect GetSection(Size originalSvgSize, ResizableSvgSection section) {
+      switch (section) {
+        case ResizableSvgSection.TopLeft:
+          return new Rect(Point.Zero, new Size(Left, Top));
+        case ResizableSvgSection.TopCenter:
+          return new Rect(new Point(Left, 0), originalSvgSize);
+        case ResizableSvgSection.TopRight:
+          return new Rect(new Point(originalSvgSize.Width - Right, 0), originalSvgSize);
+        case ResizableSvgSection.CenterLeft:
+          return new Rect(new Point(0, Top), originalSvgSize);
+        case ResizableSvgSection.CenterCenter:
+          return new Rect(new Point(Left, Top), originalSvgSize);
+        case ResizableSvgSection.CenterRight:
+          return new Rect(new Point(originalSvgSize.Width - Right, Top), originalSvgSize);
+        case ResizableSvgSection.BottomLeft:
+          return new Rect(new Point(0, originalSvgSize.Height - Bottom), originalSvgSize);
+        case ResizableSvgSection.BottomCenter:
+          return new Rect(new Point(Left, originalSvgSize.Height - Bottom), originalSvgSize);
+        case ResizableSvgSection.BottomRight:
+          return new Rect(new Point(originalSvgSize.Width - Right, originalSvgSize.Height - Bottom), originalSvgSize);
+        default:
+          throw new ArgumentOutOfRangeException("section", "Invalid resizable SVG section");
+      }
+    }
 
     public override bool Equals(object obj)
     {
