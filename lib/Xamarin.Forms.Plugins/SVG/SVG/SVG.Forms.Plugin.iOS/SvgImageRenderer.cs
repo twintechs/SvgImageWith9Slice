@@ -120,8 +120,8 @@ namespace SVG.Forms.Plugin.iOS
         }).ToArray();
 
         foreach (var sliceFramePair in sliceFramePairs) {
-          var upperLeftImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
-          finalCanvas.DrawImage(upperLeftImage, sliceFramePair.Item2);
+          var sliceImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
+          finalCanvas.DrawImage(sliceImage, sliceFramePair.Item2);
         }
       }
       else
