@@ -77,9 +77,8 @@ namespace SVG.Forms.Plugin.iOS
 
 
         var scaleFactor = UIScreen.MainScreen.Scale;
-        var finalCanvas = new ApplePlatform().CreateImageCanvas(graphics.Size, scale * scaleFactor);
-
-        RenderSvgToCanvas(graphics, originalSvgSize, scale * scaleFactor, finalCanvas);
+        var outputSize = originalSvgSize;
+        var finalCanvas = RenderSvgToCanvas(graphics, originalSvgSize, outputSize, scale * scaleFactor, CreatePlatformImageCanvas);
 
         var image = finalCanvas.GetImage();
 
@@ -88,8 +87,10 @@ namespace SVG.Forms.Plugin.iOS
       }
     }
 
-    void RenderSvgToCanvas(Graphic graphics, Size originalSvgSize, double finalScale, IImageCanvas finalCanvas)
+    static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new ApplePlatform().CreateImageCanvas(size, scale);
+    IImageCanvas RenderSvgToCanvas(Graphic graphics, Size originalSvgSize, Size outputSize, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
     {
+      var finalCanvas = createPlatformImageCanvas(outputSize, finalScale);
       // TEMP: Fill for canvas visiblity.
       // TODO: Remove this.
       finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
@@ -140,7 +141,7 @@ namespace SVG.Forms.Plugin.iOS
         };
 
         foreach (var sliceFramePair in sliceFramePairs) {
-          var upperLeftImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale);
+          var upperLeftImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
           finalCanvas.DrawImage(upperLeftImage, sliceFramePair.Item2);
         }
       }
@@ -149,12 +150,13 @@ namespace SVG.Forms.Plugin.iOS
         // Typical approach to rendering an SVG; just draw it to the canvas.
         graphics.Draw(finalCanvas);
       }
+      return finalCanvas;
     }
 
-    static IImage RenderSectionToImage(/*this*/ Graphic graphics, Rect sourceFrame, Rect outputFrame, double finalScale)
+    static IImage RenderSectionToImage(/*this*/ Graphic graphics, Rect sourceFrame, Rect outputFrame, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
     {
       graphics.ViewBox = sourceFrame;
-      var sectionCanvas = new ApplePlatform().CreateImageCanvas(outputFrame.Size, finalScale);
+      var sectionCanvas = createPlatformImageCanvas(outputFrame.Size, finalScale);
 
       // TODO: Remove (debug helper section shading)
       var debugBrush = GetDebugBrush();
@@ -165,7 +167,7 @@ namespace SVG.Forms.Plugin.iOS
     }
 
     static int currentDebugBrushIndex = 0;
-    static SolidBrush[] debugBrushes = new[] { Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Yellow };
+    static readonly SolidBrush[] debugBrushes = new[] { Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Yellow };
     static SolidBrush GetDebugBrush() {
       return debugBrushes[currentDebugBrushIndex++ % debugBrushes.Length];
     }
