@@ -6,6 +6,7 @@ using SVG.Forms.Plugin.Abstractions;
 using NGraphics;
 using UIKit;
 using System;
+using System.Linq;
 using CoreGraphics;
 using Foundation;
 using NGraphics.Custom.Parsers;
@@ -103,43 +104,20 @@ namespace SVG.Forms.Plugin.iOS
 
         var sliceInsets = _formsControl.Svg9SliceInsets;
         var sliceFramePairs = new[] {
-          // Upper left
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.TopLeft),
-            new Rect(Point.Zero, new Size(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top))),
-          // Upper middle
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.TopCenter),
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, 0), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top))),
-          // Upper right
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.TopRight),
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, 0), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top))),
-          // Middle left
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.CenterLeft),
-            new Rect(new Point(0, _formsControl.Svg9SliceInsets.Top), new Size(_formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
-          // Center
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.CenterCenter),
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Top), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
-          // Middle right
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.CenterRight),
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Top), new Size(_formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom - _formsControl.Svg9SliceInsets.Top))),
-          // Lower left
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.BottomLeft),
-            new Rect(new Point(0, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(_formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Bottom))),
-          // Lower middle
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.BottomCenter),
-            new Rect(new Point(_formsControl.Svg9SliceInsets.Left, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right - _formsControl.Svg9SliceInsets.Left, _formsControl.Svg9SliceInsets.Bottom))),
-          // Lower right
-          Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, ResizableSvgSection.BottomRight),
-            new Rect(new Point(originalSvgSize.Width - _formsControl.Svg9SliceInsets.Right, originalSvgSize.Height - _formsControl.Svg9SliceInsets.Bottom), new Size(_formsControl.Svg9SliceInsets.Right, _formsControl.Svg9SliceInsets.Bottom))),
-        };
+          ResizableSvgSection.TopLeft,
+          ResizableSvgSection.TopCenter,
+          ResizableSvgSection.TopRight,
+          ResizableSvgSection.CenterLeft,
+          ResizableSvgSection.CenterCenter,
+          ResizableSvgSection.CenterRight,
+          ResizableSvgSection.BottomLeft,
+          ResizableSvgSection.BottomCenter,
+          ResizableSvgSection.BottomRight,
+        }.Select(section => {
+          return Tuple.Create(
+            sliceInsets.GetSection(originalSvgSize, section),
+            sliceInsets.ScaleSection(originalSvgSize, outputSize, section));
+        }).ToArray();
 
         foreach (var sliceFramePair in sliceFramePairs) {
           var upperLeftImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
