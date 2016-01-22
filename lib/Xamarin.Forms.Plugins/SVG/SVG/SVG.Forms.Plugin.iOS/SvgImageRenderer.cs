@@ -78,7 +78,7 @@ namespace SVG.Forms.Plugin.iOS
 
 
         var scaleFactor = UIScreen.MainScreen.Scale;
-        var outputSize = originalSvgSize;
+        var outputSize = new Size(width, height);
         var finalCanvas = RenderSvgToCanvas(graphics, originalSvgSize, outputSize, scale * scaleFactor, CreatePlatformImageCanvas);
 
         var image = finalCanvas.GetImage();

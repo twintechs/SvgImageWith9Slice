@@ -73,7 +73,7 @@ namespace SVG.Forms.Plugin.Droid
             scale = width / graphics.Size.Width;
           }
 
-            var outputSize = originalSvgSize;
+            var outputSize = new Size(width, height);
             var finalCanvas = RenderSvgToCanvas(graphics, originalSvgSize, outputSize, scale, CreatePlatformImageCanvas);
 
             var image = (BitmapImage)finalCanvas.GetImage();
