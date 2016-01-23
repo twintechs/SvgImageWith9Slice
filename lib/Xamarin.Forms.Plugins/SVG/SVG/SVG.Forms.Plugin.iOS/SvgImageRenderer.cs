@@ -58,24 +58,12 @@ namespace SVG.Forms.Plugin.iOS
 
       var width = _formsControl.WidthRequest <= 0 ? 100 : _formsControl.WidthRequest;
       var height = _formsControl.HeightRequest <= 0 ? 100 : _formsControl.HeightRequest;
-
-      var scale = 1.0;
-
-      if (height >= width)
-      {
-        scale = height/_LoadedGraphic.Size.Height;
-      }
-      else
-      {
-        scale = width/_LoadedGraphic.Size.Width;
-      }
-
-      var scaleFactor = UIScreen.MainScreen.Scale;
       var outputSize = new Size(width, height);
-      var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, originalSvgSize, outputSize, scale * scaleFactor, CreatePlatformImageCanvas);
+      var screenScaleFactor = UIScreen.MainScreen.Scale;
+
+      var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, originalSvgSize, outputSize, screenScaleFactor, CreatePlatformImageCanvas);
 
       var image = finalCanvas.GetImage();
-
       var uiImage = image.GetUIImage();
       Control.Image = uiImage;
     }
@@ -161,10 +149,18 @@ namespace SVG.Forms.Plugin.iOS
       else
       {
         // Typical approach to rendering an SVG; just draw it to the canvas.
-        // Make sure ViewBox is reset to default in case it was previous set by slicing.
-        // TODO: Canvas is now at output scale instead of original size. Need to account for 
-        //       that with ViewBox size scaling.
-        graphics.ViewBox = new Rect(Point.Zero, graphics.Size);
+        double proportionalOutputScale;
+        if (outputSize.Height >= outputSize.Width)
+        {
+          proportionalOutputScale = outputSize.Width/_LoadedGraphic.Size.Width;
+        }
+        else
+        {
+          proportionalOutputScale = outputSize.Height/_LoadedGraphic.Size.Height;
+        }
+
+        // Make sure ViewBox is reset to a proportionally-scaled default in case it was previous set by slicing.
+        graphics.ViewBox = new Rect(Point.Zero, graphics.Size / proportionalOutputScale);
         graphics.Draw(finalCanvas);
       }
       return finalCanvas;
