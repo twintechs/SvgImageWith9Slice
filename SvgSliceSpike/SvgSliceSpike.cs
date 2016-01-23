@@ -62,19 +62,14 @@ namespace SvgSliceSpike {
 
             // The root page of your application
             MainPage = new ContentPage {
-                Content = new ScrollView {
-                    Content = new StackLayout {
-                        VerticalOptions = LayoutOptions.Center,
-                        HorizontalOptions = LayoutOptions.Center,
-                        Children = {
-                            _InsetSlider,
-                            _SlicingSvg,
-                            new BoxView {
-                                HeightRequest = 700,
-                            },
-                        },
-                        BindingContext = _ViewModel,
+                Content = new StackLayout {
+                    VerticalOptions = LayoutOptions.Center,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Children = {
+                        _InsetSlider,
+                        _SlicingSvg,
                     },
+                    BindingContext = _ViewModel,
                 },
             };
         }
