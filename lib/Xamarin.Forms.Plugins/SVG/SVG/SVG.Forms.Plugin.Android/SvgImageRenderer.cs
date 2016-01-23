@@ -18,6 +18,8 @@ using NGraphics.Custom.Codes;
 using NGraphics.Custom.Models.Brushes;
 using NGraphics.Custom.Interfaces;
 using NGraphics.Custom;
+using System.ComponentModel;
+using Android.Graphics;
 
 [assembly: ExportRenderer (typeof(SvgImage), typeof(SvgImageRenderer))]
 namespace SVG.Forms.Plugin.Droid
@@ -37,75 +39,83 @@ namespace SVG.Forms.Plugin.Droid
 			}
 		}
 
-		protected override async void OnElementChanged (ElementChangedEventArgs<SvgImage> e)
-		{
-			base.OnElementChanged (e);
+    protected override void OnLayout(bool changed, int l, int t, int r, int b)
+    {
+      base.OnLayout(changed, l, t, r, b);
 
-		  if (_formsControl != null)
-		  {
-        await Task.Run(async () =>
-        {
-          var svgStream = _formsControl.SvgAssembly.GetManifestResourceStream(_formsControl.SvgPath);
+      // Redraw SVG to new size.
+      // TODO: Put some shortcut logic to avoid this when rendered size won't change
+      //       (e.g., displaying proportional to horizontal and vertical has grown).
+      var originalSvgSize = _LoadedGraphic.Size;
 
-          if (svgStream == null)
-          {
-            throw new Exception(string.Format("Error retrieving {0} make sure Build Action is Embedded Resource",
-              _formsControl.SvgPath));
-          }
+      var width = _formsControl.WidthRequest <= 0 ? 100 : _formsControl.WidthRequest;
+      var height = _formsControl.HeightRequest <= 0 ? 100 : _formsControl.HeightRequest;
+      var outputSize = new Size(width, height);
+      var screenScale = 1.0; // Don't deal with screen scaling on Android.
 
-          var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
+      var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, originalSvgSize, outputSize, screenScale, CreatePlatformImageCanvas);
+      var image = (BitmapImage)finalCanvas.GetImage();
 
-          var graphics = r.Graphic;
+      Control.SetImageBitmap(image.Bitmap);
+    }
 
-            var originalSvgSize = graphics.Size;
+    protected override void OnElementChanged(ElementChangedEventArgs<SvgImage> e)
+    {
+      base.OnElementChanged(e);
 
-          var width = PixelToDP((int)_formsControl.WidthRequest <= 0 ? 100 : (int)_formsControl.WidthRequest);
-          var height = PixelToDP((int)_formsControl.HeightRequest <= 0 ? 100 : (int)_formsControl.HeightRequest);
-
-          var scale = 1.0;
-
-          if (height >= width)
-          {
-            scale = height / graphics.Size.Height;
-          }
-          else
-          {
-            scale = width / graphics.Size.Width;
-          }
-
-            var outputSize = new Size(width, height);
-            var finalCanvas = RenderSvgToCanvas(graphics, originalSvgSize, outputSize, scale, CreatePlatformImageCanvas);
-
-            var image = (BitmapImage)finalCanvas.GetImage();
-          return image;
-        }).ContinueWith(taskResult =>
-        {
-          Device.BeginInvokeOnMainThread(() =>
+      if (_formsControl != null)
+      {
+        LoadSvgFromResource();
+        Device.BeginInvokeOnMainThread(() =>
           {
             var imageView = new ImageView(Context);
 
             imageView.SetScaleType(ImageView.ScaleType.FitXy);
-            imageView.SetImageBitmap(taskResult.Result.Bitmap);
 
+            // TODO: ?Reuse existing Control instead?
             SetNativeControl(imageView);
           });
+      }
+    }
 
-        });
-		  }
-		}
+    protected override void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
+    {
+      base.OnElementPropertyChanged (sender, e);
 
-		public override SizeRequest GetDesiredSize (int widthConstraint, int heightConstraint)
-		{
-			return new SizeRequest (new Xamarin.Forms.Size (_formsControl.WidthRequest, _formsControl.WidthRequest));
-		}
+      if (e.PropertyName == SvgImage.SvgPathProperty.PropertyName
+        || e.PropertyName == SvgImage.SvgAssemblyProperty.PropertyName) {
+        LoadSvgFromResource();
+        RequestLayout();
+      }
+      else if (e.PropertyName == SvgImage.SvgStretchableInsetsProperty.PropertyName) {
+        RequestLayout();
+      }
+    }
 
+    Graphic _LoadedGraphic { get; set; }
+    void LoadSvgFromResource() {
+      var svgStream = _formsControl.SvgAssembly.GetManifestResourceStream(_formsControl.SvgPath);
+
+      if (svgStream == null)
+      {
+        throw new Exception(string.Format("Error retrieving {0} make sure Build Action is Embedded Resource",
+          _formsControl.SvgPath));
+      }
+
+      var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
+
+      _LoadedGraphic = r.Graphic;
+    }
+
+    public override SizeRequest GetDesiredSize (int widthConstraint, int heightConstraint)
+    {
+      return new SizeRequest (new Xamarin.Forms.Size (_formsControl.WidthRequest, _formsControl.WidthRequest));
+    }
+    
     static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new AndroidPlatform().CreateImageCanvas(size, scale);
     IImageCanvas RenderSvgToCanvas(Graphic graphics, Size originalSvgSize, Size outputSize, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
     {
       var finalCanvas = createPlatformImageCanvas(outputSize, finalScale);
-      // TEMP: Fill for canvas visiblity.
-      // TODO: Remove this.
-      finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
 
       if (_formsControl.SvgStretchableInsets != ResizableSvgInsets.Zero)
       {
@@ -136,6 +146,18 @@ namespace SVG.Forms.Plugin.Droid
       else
       {
         // Typical approach to rendering an SVG; just draw it to the canvas.
+        double proportionalOutputScale;
+        if (outputSize.Height >= outputSize.Width)
+        {
+          proportionalOutputScale = outputSize.Width/_LoadedGraphic.Size.Width;
+        }
+        else
+        {
+          proportionalOutputScale = outputSize.Height/_LoadedGraphic.Size.Height;
+        }
+
+        // Make sure ViewBox is reset to a proportionally-scaled default in case it was previous set by slicing.
+        graphics.ViewBox = new Rect(Point.Zero, graphics.Size / proportionalOutputScale);
         graphics.Draw(finalCanvas);
       }
       return finalCanvas;
@@ -152,18 +174,8 @@ namespace SVG.Forms.Plugin.Droid
       // Potentially setting ViewBox size smaller to enlarge result.
       graphics.ViewBox = new Rect(sourceFrame.Position, new Size(originalSize.Width / sliceHorizontalScale, originalSize.Height / sliceVerticalScale));
 
-      // TODO: Remove (debug helper section shading)
-      var debugBrush = GetDebugBrush();
-      sectionCanvas.DrawRectangle(new Rect(Point.Zero, outputFrame.Size), new NGraphics.Custom.Models.Pen(debugBrush.Color), debugBrush);
-
       graphics.Draw(sectionCanvas);
       return sectionCanvas.GetImage();
-    }
-
-    static int currentDebugBrushIndex = 0;
-    static readonly SolidBrush[] debugBrushes = new[] { Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Yellow };
-    static SolidBrush GetDebugBrush() {
-      return debugBrushes[currentDebugBrushIndex++ % debugBrushes.Length];
     }
 
     /// <summary>
