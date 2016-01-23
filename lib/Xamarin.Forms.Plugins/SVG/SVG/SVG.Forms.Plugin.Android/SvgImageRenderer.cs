@@ -107,13 +107,11 @@ namespace SVG.Forms.Plugin.Droid
       // TODO: Remove this.
       finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
 
-      if (_formsControl.Svg9SliceInsets != ResizableSvgInsets.Zero)
+      if (_formsControl.SvgStretchableInsets != ResizableSvgInsets.Zero)
       {
         // Doing a stretchy 9-slice manipulation on the original SVG.
-        // [x] Partition into 9 segments, based on _formsControl.Svg9SliceInsets
-        // TODO: Redraw into final version with proportions based on translation between the original and the [potentially-stretched] segments
-
-        var sliceInsets = _formsControl.Svg9SliceInsets;
+        // Partition into 9 segments, based on _formsControl.Svg9SliceInsets, storing both original and scaled sizes.
+        var sliceInsets = _formsControl.SvgStretchableInsets;
         var sliceFramePairs = new[] {
           ResizableSvgSection.TopLeft,
           ResizableSvgSection.TopCenter,
@@ -127,7 +125,7 @@ namespace SVG.Forms.Plugin.Droid
         }.Select(section => {
           return Tuple.Create(
             sliceInsets.GetSection(originalSvgSize, section),
-            sliceInsets.ScaleSection(originalSvgSize, outputSize, section));
+            sliceInsets.ScaleSection(outputSize, section));
         }).ToArray();
 
         foreach (var sliceFramePair in sliceFramePairs) {
@@ -145,8 +143,14 @@ namespace SVG.Forms.Plugin.Droid
 
     static IImage RenderSectionToImage(/*this*/ Graphic graphics, Rect sourceFrame, Rect outputFrame, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
     {
-      graphics.ViewBox = sourceFrame;
+      var originalSize = graphics.Size;
       var sectionCanvas = createPlatformImageCanvas(outputFrame.Size, finalScale);
+
+      // Redraw into final version with any scaling between the original and the output slice.
+      var sliceVerticalScale = outputFrame.Height / sourceFrame.Height;
+      var sliceHorizontalScale = outputFrame.Width / sourceFrame.Width;
+      // Potentially setting ViewBox size smaller to enlarge result.
+      graphics.ViewBox = new Rect(sourceFrame.Position, new Size(originalSize.Width / sliceHorizontalScale, originalSize.Height / sliceVerticalScale));
 
       // TODO: Remove (debug helper section shading)
       var debugBrush = GetDebugBrush();
