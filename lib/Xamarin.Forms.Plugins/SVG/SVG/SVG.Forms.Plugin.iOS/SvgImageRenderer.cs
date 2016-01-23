@@ -19,6 +19,7 @@ using NGraphics.Custom.Codes;
 using NGraphics.Custom.Interfaces;
 using NGraphics.Custom;
 using NGraphics.Custom.Models.Brushes;
+using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(SVG.Forms.Plugin.Abstractions.SvgImage), typeof(SvgImageRenderer))]
 namespace SVG.Forms.Plugin.iOS
@@ -42,49 +43,81 @@ namespace SVG.Forms.Plugin.iOS
       get { return Element as SvgImage; }
     }
 
+    public override void Draw(CGRect rect)
+    {
+        base.Draw(rect);
+    }
+    public override void LayoutSubviews()
+    {
+      base.LayoutSubviews();
+
+      // Redraw SVG to new size.
+      // TODO: Put some shortcut logic to avoid this when rendered size won't change
+      //       (e.g., displaying proportional to horizontal and vertical has grown).
+      var originalSvgSize = _LoadedGraphic.Size;
+
+      var width = _formsControl.WidthRequest <= 0 ? 100 : _formsControl.WidthRequest;
+      var height = _formsControl.HeightRequest <= 0 ? 100 : _formsControl.HeightRequest;
+
+      var scale = 1.0;
+
+      if (height >= width)
+      {
+        scale = height/_LoadedGraphic.Size.Height;
+      }
+      else
+      {
+        scale = width/_LoadedGraphic.Size.Width;
+      }
+
+      var scaleFactor = UIScreen.MainScreen.Scale;
+      var outputSize = new Size(width, height);
+      var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, originalSvgSize, outputSize, scale * scaleFactor, CreatePlatformImageCanvas);
+
+      var image = finalCanvas.GetImage();
+
+      var uiImage = image.GetUIImage();
+      Control.Image = uiImage;
+    }
+
+    protected override void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
+    {
+      base.OnElementPropertyChanged (sender, e);
+
+      System.Diagnostics.Debug.WriteLine($"OnElementPropertyChanged: {e.PropertyName}");
+      if (e.PropertyName == SvgImage.SvgPathProperty.PropertyName
+        || e.PropertyName == SvgImage.SvgAssemblyProperty.PropertyName) {
+        LoadSvgFromResource();
+        SetNeedsLayout();
+      }
+      else if (e.PropertyName == SvgImage.SvgStretchableInsetsProperty.PropertyName) {
+        SetNeedsLayout();
+      }
+    }
+
+    Graphic _LoadedGraphic { get; set; }
+    void LoadSvgFromResource() {
+      var svgStream = _formsControl.SvgAssembly.GetManifestResourceStream(_formsControl.SvgPath);
+
+      if (svgStream == null)
+      {
+        throw new Exception(string.Format("Error retrieving {0} make sure Build Action is Embedded Resource",
+          _formsControl.SvgPath));
+      }
+
+      var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
+
+      _LoadedGraphic = r.Graphic;
+    }
+
     protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
     {
       base.OnElementChanged(e);
 
+      System.Diagnostics.Debug.WriteLine($"OnElementChanged: {e.NewElement}");
       if (_formsControl != null)
       {
-        var svgStream = _formsControl.SvgAssembly.GetManifestResourceStream(_formsControl.SvgPath);
-
-        if (svgStream == null)
-        {
-          throw new Exception(string.Format("Error retrieving {0} make sure Build Action is Embedded Resource",
-            _formsControl.SvgPath));
-        }
-
-        var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
-
-        var graphics = r.Graphic;
-
-        var originalSvgSize = graphics.Size;
-
-        var width = _formsControl.WidthRequest <= 0 ? 100 : _formsControl.WidthRequest;
-        var height = _formsControl.HeightRequest <= 0 ? 100 : _formsControl.HeightRequest;
-
-        var scale = 1.0;
-
-        if (height >= width)
-        {
-          scale = height/graphics.Size.Height;
-        }
-        else
-        {
-          scale = width/graphics.Size.Width;
-        }
-
-
-        var scaleFactor = UIScreen.MainScreen.Scale;
-        var outputSize = new Size(width, height);
-        var finalCanvas = RenderSvgToCanvas(graphics, originalSvgSize, outputSize, scale * scaleFactor, CreatePlatformImageCanvas);
-
-        var image = finalCanvas.GetImage();
-
-        var uiImage = image.GetUIImage();
-        Control.Image = uiImage;
+        LoadSvgFromResource();
       }
     }
 
@@ -96,11 +129,11 @@ namespace SVG.Forms.Plugin.iOS
       // TODO: Remove this.
       finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
 
-      if (_formsControl.Svg9SliceInsets != ResizableSvgInsets.Zero)
+      if (_formsControl.SvgStretchableInsets != ResizableSvgInsets.Zero)
       {
         // Doing a stretchy 9-slice manipulation on the original SVG.
         // Partition into 9 segments, based on _formsControl.Svg9SliceInsets, storing both original and scaled sizes.
-        var sliceInsets = _formsControl.Svg9SliceInsets;
+        var sliceInsets = _formsControl.SvgStretchableInsets;
         var sliceFramePairs = new[] {
           ResizableSvgSection.TopLeft,
           ResizableSvgSection.TopCenter,
@@ -121,10 +154,17 @@ namespace SVG.Forms.Plugin.iOS
           var sliceImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
           finalCanvas.DrawImage(sliceImage, sliceFramePair.Item2);
         }
+
+        // TODO: Remove (debug helper section shading)
+        currentDebugBrushIndex = 0;
       }
       else
       {
         // Typical approach to rendering an SVG; just draw it to the canvas.
+        // Make sure ViewBox is reset to default in case it was previous set by slicing.
+        // TODO: Canvas is now at output scale instead of original size. Need to account for 
+        //       that with ViewBox size scaling.
+        graphics.ViewBox = new Rect(Point.Zero, graphics.Size);
         graphics.Draw(finalCanvas);
       }
       return finalCanvas;
