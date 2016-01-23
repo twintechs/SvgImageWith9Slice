@@ -68,6 +68,17 @@ namespace SVG.Forms.Plugin.iOS
       Control.Image = uiImage;
     }
 
+    protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
+    {
+      base.OnElementChanged(e);
+
+      System.Diagnostics.Debug.WriteLine($"OnElementChanged: {e.NewElement}");
+      if (_formsControl != null)
+      {
+        LoadSvgFromResource();
+      }
+    }
+
     protected override void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
     {
       base.OnElementPropertyChanged (sender, e);
@@ -96,17 +107,6 @@ namespace SVG.Forms.Plugin.iOS
       var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
 
       _LoadedGraphic = r.Graphic;
-    }
-
-    protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
-    {
-      base.OnElementChanged(e);
-
-      System.Diagnostics.Debug.WriteLine($"OnElementChanged: {e.NewElement}");
-      if (_formsControl != null)
-      {
-        LoadSvgFromResource();
-      }
     }
 
     static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new ApplePlatform().CreateImageCanvas(size, scale);
