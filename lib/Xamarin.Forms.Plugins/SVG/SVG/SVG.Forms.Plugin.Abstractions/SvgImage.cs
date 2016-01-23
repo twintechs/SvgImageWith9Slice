@@ -158,19 +158,21 @@ namespace SVG.Forms.Plugin.Abstractions
       set { SetValue(SvgAssemblyProperty, value); }
     }
 
-        /// <summary>
-        /// Optional SVG 9-slice insets
-        /// </summary>
-        public static readonly BindableProperty Svg9SliceInsetsProperty =
-            BindableProperty.Create("SvgPath", typeof(ResizableSvgInsets), typeof(SvgImage), default(ResizableSvgInsets));
+    /// <summary>
+    /// Optional SVG 9-slice insets
+    /// </summary>
+    public static readonly BindableProperty SvgStretchableInsetsProperty =
+      BindableProperty.Create(nameof(SvgStretchableInsets), typeof(ResizableSvgInsets), typeof(SvgImage), default(ResizableSvgInsets));
 
-        /// <summary>
-        /// The path to the svg file
-        /// </summary>
-        public ResizableSvgInsets Svg9SliceInsets
-        {
-            get { return (ResizableSvgInsets)GetValue(Svg9SliceInsetsProperty); }
-            set { SetValue(Svg9SliceInsetsProperty, value); }
-        }
+    /// <summary>
+    /// Optional SVG 9-slice insets
+    /// </summary>
+    public ResizableSvgInsets SvgStretchableInsets
+    {
+      get { return (ResizableSvgInsets)GetValue(SvgStretchableInsetsProperty); }
+      set {
+        SetValue(SvgStretchableInsetsProperty, value);
+      }
+    }
   }
 }
