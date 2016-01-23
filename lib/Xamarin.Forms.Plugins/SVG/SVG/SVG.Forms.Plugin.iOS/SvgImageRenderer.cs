@@ -72,7 +72,6 @@ namespace SVG.Forms.Plugin.iOS
     {
       base.OnElementChanged(e);
 
-      System.Diagnostics.Debug.WriteLine($"OnElementChanged: {e.NewElement}");
       if (_formsControl != null)
       {
         LoadSvgFromResource();
@@ -83,7 +82,6 @@ namespace SVG.Forms.Plugin.iOS
     {
       base.OnElementPropertyChanged (sender, e);
 
-      System.Diagnostics.Debug.WriteLine($"OnElementPropertyChanged: {e.PropertyName}");
       if (e.PropertyName == SvgImage.SvgPathProperty.PropertyName
         || e.PropertyName == SvgImage.SvgAssemblyProperty.PropertyName) {
         LoadSvgFromResource();
@@ -113,9 +111,6 @@ namespace SVG.Forms.Plugin.iOS
     IImageCanvas RenderSvgToCanvas(Graphic graphics, Size originalSvgSize, Size outputSize, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
     {
       var finalCanvas = createPlatformImageCanvas(outputSize, finalScale);
-      // TEMP: Fill for canvas visiblity.
-      // TODO: Remove this.
-      finalCanvas.DrawRectangle(new Rect(finalCanvas.Size), new NGraphics.Custom.Models.Pen(Brushes.LightGray.Color), Brushes.LightGray);
 
       if (_formsControl.SvgStretchableInsets != ResizableSvgInsets.Zero)
       {
@@ -142,9 +137,6 @@ namespace SVG.Forms.Plugin.iOS
           var sliceImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
           finalCanvas.DrawImage(sliceImage, sliceFramePair.Item2);
         }
-
-        // TODO: Remove (debug helper section shading)
-        currentDebugBrushIndex = 0;
       }
       else
       {
@@ -177,18 +169,8 @@ namespace SVG.Forms.Plugin.iOS
       // Potentially setting ViewBox size smaller to enlarge result.
       graphics.ViewBox = new Rect(sourceFrame.Position, new Size(originalSize.Width / sliceHorizontalScale, originalSize.Height / sliceVerticalScale));
 
-      // TODO: Remove (debug helper section shading)
-      var debugBrush = GetDebugBrush();
-      sectionCanvas.DrawRectangle(new Rect(Point.Zero, outputFrame.Size), new NGraphics.Custom.Models.Pen(debugBrush.Color), debugBrush);
-
       graphics.Draw(sectionCanvas);
       return sectionCanvas.GetImage();
-    }
-
-    static int currentDebugBrushIndex = 0;
-    static readonly SolidBrush[] debugBrushes = new[] { Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Yellow };
-    static SolidBrush GetDebugBrush() {
-      return debugBrushes[currentDebugBrushIndex++ % debugBrushes.Length];
     }
   }
 }
