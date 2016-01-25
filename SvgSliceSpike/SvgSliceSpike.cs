@@ -27,7 +27,7 @@ namespace SvgSliceSpike {
         }
 
         public TestModel() {
-            AllSidesInset = 38;
+            AllSidesInset = 0;
         }
 
         #region INotifyPropertyChanged implementation
@@ -36,6 +36,7 @@ namespace SvgSliceSpike {
     }
     public class App : Application {
         readonly TestModel _ViewModel;
+        int _CurrentStretchableInset = 0;
         SvgImage _SlicingSvg;
         readonly Slider _InsetSlider;
         public App() {
@@ -45,8 +46,9 @@ namespace SvgSliceSpike {
                 Maximum = 39.5,
                 Value = _ViewModel.AllSidesInset,
             };
+            _InsetSlider.SetBinding(Slider.ValueProperty, nameof(TestModel.AllSidesInset), BindingMode.TwoWay);
             _SlicingSvg = new SvgImage() {
-                SvgPath = "SvgSliceSpike.Assets.twintechs-logo.svg",
+                SvgPath = "SvgSliceSpike.Assets.MocastIcon.svg",
                 SvgAssembly = typeof(App).GetTypeInfo().Assembly,
                 SvgStretchableInsets = new ResizableSvgInsets(_InsetSlider.Value),
                 WidthRequest = 300,
@@ -54,11 +56,7 @@ namespace SvgSliceSpike {
 //                WidthRequest = 139,
 //                HeightRequest = 79,
             };
-
-            _InsetSlider.ValueChanged += (sender, e) => {
-                // HACK: SvgImage can't be changed after creation (yet). Toss the old and create a new one.
-                _SlicingSvg.SvgStretchableInsets = new ResizableSvgInsets(e.NewValue);
-            };
+            _SlicingSvg.SetBinding(SvgImage.SvgStretchableInsetsProperty, nameof(TestModel.SvgInsets));
 
             // The root page of your application
             MainPage = new ContentPage {
