@@ -36,7 +36,6 @@ namespace SvgSliceSpike {
     }
     public class App : Application {
         readonly TestModel _ViewModel;
-        int _CurrentStretchableInset = 0;
         SvgImage _SlicingSvg;
         readonly Slider _InsetSlider;
         public App() {
@@ -50,7 +49,6 @@ namespace SvgSliceSpike {
             _SlicingSvg = new SvgImage() {
                 SvgPath = "SvgSliceSpike.Assets.MocastIcon.svg",
                 SvgAssembly = typeof(App).GetTypeInfo().Assembly,
-                SvgStretchableInsets = new ResizableSvgInsets(_InsetSlider.Value),
                 WidthRequest = 300,
                 HeightRequest = 300,
 //                WidthRequest = 139,
