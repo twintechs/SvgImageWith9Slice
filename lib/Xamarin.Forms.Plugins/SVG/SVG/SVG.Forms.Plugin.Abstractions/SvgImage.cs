@@ -19,20 +19,20 @@ namespace SVG.Forms.Plugin.Abstractions
     BottomRight,
   }
   public struct ResizableSvgInsets : IEquatable<ResizableSvgInsets> {
-    public double Top { get; set; }
-    public double Right { get; set; }
-    public double Bottom { get; set; }
-    public double Left { get; set; }
+    public int Top { get; set; }
+    public int Right { get; set; }
+    public int Bottom { get; set; }
+    public int Left { get; set; }
     
     public static ResizableSvgInsets Zero = new ResizableSvgInsets(0, 0, 0, 0);
-    public ResizableSvgInsets(double top, double right, double bottom, double left) {
+    public ResizableSvgInsets(int top, int right, int bottom, int left) {
       Top = top;
       Right = right;
       Bottom = bottom;
       Left = left;
     }
-    public ResizableSvgInsets(double vertical, double horizontal) : this(vertical, horizontal, vertical, horizontal) { }
-    public ResizableSvgInsets(double allSides) : this(allSides, allSides, allSides, allSides) { }
+    public ResizableSvgInsets(int vertical, int horizontal) : this(vertical, horizontal, vertical, horizontal) { }
+    public ResizableSvgInsets(int allSides) : this(allSides, allSides, allSides, allSides) { }
 
     // NOTE: Returns actual section from original SVG, not what is used for the ViewBox when slicing
     //       (which seems to require the original SVG size, or a proportional scale of it for resizing).
@@ -65,8 +65,8 @@ namespace SVG.Forms.Plugin.Abstractions
       // TODO: Decide if the corners scale proportionally (an option with SVGs) or if they always stay the same size (current) or if it is optional.
       // TODO: Factor in `scaleCorners`, if needed.
       //public Rect ScaleSection(Size originalSvgSize, Size finalImageSize, ResizableSvgSection section, bool scaleCorners) {
-//      double horizontalScale = finalImageSize.Width / originalSvgSize.Width;
-//      double verticalScale = finalImageSize.Height / originalSvgSize.Height;
+//      int horizontalScale = finalImageSize.Width / originalSvgSize.Width;
+//      int verticalScale = finalImageSize.Height / originalSvgSize.Height;
 //      Rect originalSection = GetSection(originalSvgSize, section);
       switch (section) {
         case ResizableSvgSection.TopLeft:
@@ -118,10 +118,10 @@ namespace SVG.Forms.Plugin.Abstractions
     #region IEquatable implementation
     public bool Equals(ResizableSvgInsets other)
     {
-      return Math.Abs(Top - other.Top) < double.Epsilon
-        && Math.Abs(Right - other.Right) < double.Epsilon
-        && Math.Abs(Bottom - other.Bottom) < double.Epsilon
-        && Math.Abs(Left - other.Left) < double.Epsilon;
+      return Top == other.Top
+        && Right == other.Right
+        && Bottom == other.Bottom
+        && Left == other.Left;
     }
     #endregion
   }

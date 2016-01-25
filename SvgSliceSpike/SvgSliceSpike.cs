@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace SvgSliceSpike {
     public class TestModel : INotifyPropertyChanged {
-        double _AllSidesInset;
-        public double AllSidesInset {
+        int _AllSidesInset;
+        public int AllSidesInset {
             get { return _AllSidesInset; }
             set {
                 if (value != _AllSidesInset) {
