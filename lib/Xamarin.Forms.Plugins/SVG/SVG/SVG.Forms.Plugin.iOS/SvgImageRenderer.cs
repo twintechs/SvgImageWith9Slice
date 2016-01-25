@@ -9,16 +9,10 @@ using System;
 using System.Linq;
 using CoreGraphics;
 using Foundation;
-using NGraphics.Custom.Parsers;
-using NGraphics.iOS.Custom;
-using Color = NGraphics.Custom.Models.Color;
-using Size = NGraphics.Custom.Models.Size;
-using Rect = NGraphics.Custom.Models.Rect;
-using Point = NGraphics.Custom.Models.Point;
-using NGraphics.Custom.Codes;
-using NGraphics.Custom.Interfaces;
-using NGraphics.Custom;
-using NGraphics.Custom.Models.Brushes;
+using Color = NGraphics.Color;
+using Size = NGraphics.Size;
+using Rect = NGraphics.Rect;
+using Point = NGraphics.Point;
 using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(SVG.Forms.Plugin.Abstractions.SvgImage), typeof(SvgImageRenderer))]
@@ -102,7 +96,7 @@ namespace SVG.Forms.Plugin.iOS
           _formsControl.SvgPath));
       }
 
-      var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
+      var r = new SvgReader(new StreamReader(svgStream));
 
       _LoadedGraphic = r.Graphic;
     }

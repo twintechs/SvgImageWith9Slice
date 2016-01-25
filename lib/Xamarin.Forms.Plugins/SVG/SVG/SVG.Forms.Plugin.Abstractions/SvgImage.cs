@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using Xamarin.Forms;
 using System;
-using NGraphics.Custom.Models;
-using Point = NGraphics.Custom.Models.Point;
-using Size = NGraphics.Custom.Models.Size;
+using NGraphics;
+using Point = NGraphics.Point;
+using Size = NGraphics.Size;
 
 namespace SVG.Forms.Plugin.Abstractions
 {

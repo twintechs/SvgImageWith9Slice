@@ -6,20 +6,13 @@ using SVG.Forms.Plugin.Abstractions;
 using SVG.Forms.Plugin.Droid;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using System.Threading.Tasks;
 using Android.Runtime;
-using NGraphics.Android.Custom;
-using NGraphics.Custom.Parsers;
-using Color = NGraphics.Custom.Models.Color;
-using Size = NGraphics.Custom.Models.Size;
-using Point = NGraphics.Custom.Models.Point;
-using Rect = NGraphics.Custom.Models.Rect;
-using NGraphics.Custom.Codes;
-using NGraphics.Custom.Models.Brushes;
-using NGraphics.Custom.Interfaces;
-using NGraphics.Custom;
+using NGraphics;
+using Color = NGraphics.Color;
+using Size = NGraphics.Size;
+using Point = NGraphics.Point;
+using Rect = NGraphics.Rect;
 using System.ComponentModel;
-using Android.Graphics;
 
 [assembly: ExportRenderer (typeof(SvgImage), typeof(SvgImageRenderer))]
 namespace SVG.Forms.Plugin.Droid
@@ -102,7 +95,7 @@ namespace SVG.Forms.Plugin.Droid
           _formsControl.SvgPath));
       }
 
-      var r = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
+      var r = new SvgReader(new StreamReader(svgStream));
 
       _LoadedGraphic = r.Graphic;
     }

@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Android.Graphics;
 using System.IO;
-using NGraphics.Android.Custom;
-using NGraphics.Custom.Parsers;
+using NGraphics;
 using SVG.Forms.Plugin.Abstractions;
 
 namespace SVG.Forms.Plugin.Droid
@@ -17,7 +16,7 @@ namespace SVG.Forms.Plugin.Droid
 
       await Task.Run(() =>
       {
-        var svgReader = new SvgReader(new StreamReader(svgStream), new StylesParser(new ValuesParser()), new ValuesParser());
+          var svgReader = new SvgReader(new StreamReader(svgStream));
 
         var graphics = svgReader.Graphic;
 
