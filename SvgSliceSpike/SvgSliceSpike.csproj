@@ -60,5 +60,22 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\twintechs-logo.svg" />
+    <EmbeddedResource Include="Assets\ErulisseuiinSpaceshipPack.svg" />
+    <EmbeddedResource Include="Assets\MocastIcon.svg" />
+    <EmbeddedResource Include="Assets\repeat.svg" />
+    <EmbeddedResource Include="Assets\sliderThumb.svg" />
+    <EmbeddedResource Include="Assets\Smile.svg" />
+    <EmbeddedResource Include="Assets\SunAtNight.svg" />
+    <EmbeddedResource Include="Assets\TextVariations.svg" />
+    <EmbeddedResource Include="Assets\mozilla\BezierCurves1.svg" />
+    <EmbeddedResource Include="Assets\mozilla\BezierCurves2.svg" />
+    <EmbeddedResource Include="Assets\mozilla\Text1.svg" />
+    <EmbeddedResource Include="Assets\mozilla\Text2.svg" />
+    <EmbeddedResource Include="Assets\mozilla\Text3.svg" />
+    <EmbeddedResource Include="Assets\mozilla\Text4.svg" />
+    <EmbeddedResource Include="Assets\mozilla\ellipse.svg" />
+    <EmbeddedResource Include="Assets\mozilla\path.svg" />
+    <EmbeddedResource Include="Assets\mozilla\transform.svg" />
+    <EmbeddedResource Include="Assets\test-button.svg" />
   </ItemGroup>
 </Project>
