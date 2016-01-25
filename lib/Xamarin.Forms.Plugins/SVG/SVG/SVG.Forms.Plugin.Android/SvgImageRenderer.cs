@@ -25,26 +25,29 @@ namespace SVG.Forms.Plugin.Droid
             var temp = DateTime.Now;
         }
 
+    public SvgImageRenderer()
+    {
+      // Offer to do our own drawing so Android will actually call `Draw`.
+      SetWillNotDraw(willNotDraw: false);
+    }
+
         private SvgImage _formsControl {
 			get {
-        BitmapCanvas x;
 				return Element as SvgImage;
 			}
 		}
 
-    protected override void OnLayout(bool changed, int l, int t, int r, int b)
+    public override void Draw(Android.Graphics.Canvas canvas)
     {
-      base.OnLayout(changed, l, t, r, b);
+      base.Draw(canvas);
 
       // Redraw SVG to new size.
       // TODO: Put some shortcut logic to avoid this when rendered size won't change
       //       (e.g., displaying proportional to horizontal and vertical has grown).
       var originalSvgSize = _LoadedGraphic.Size;
 
-      var width = _formsControl.WidthRequest <= 0 ? 100 : _formsControl.WidthRequest;
-      var height = _formsControl.HeightRequest <= 0 ? 100 : _formsControl.HeightRequest;
-      var outputSize = new Size(width, height);
-      var screenScale = 1.0; // Don't deal with screen scaling on Android.
+      var outputSize = new Size(canvas.Width, canvas.Height);
+      const double screenScale = 1.0; // Don't need to deal with screen scaling on Android.
 
       var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, originalSvgSize, outputSize, screenScale, CreatePlatformImageCanvas);
       var image = (BitmapImage)finalCanvas.GetImage();
@@ -67,6 +70,7 @@ namespace SVG.Forms.Plugin.Droid
 
             // TODO: ?Reuse existing Control instead?
             SetNativeControl(imageView);
+            Invalidate();
           });
       }
     }
@@ -78,10 +82,10 @@ namespace SVG.Forms.Plugin.Droid
       if (e.PropertyName == SvgImage.SvgPathProperty.PropertyName
         || e.PropertyName == SvgImage.SvgAssemblyProperty.PropertyName) {
         LoadSvgFromResource();
-        RequestLayout();
+        Invalidate();
       }
       else if (e.PropertyName == SvgImage.SvgStretchableInsetsProperty.PropertyName) {
-        RequestLayout();
+        Invalidate();
       }
     }
 

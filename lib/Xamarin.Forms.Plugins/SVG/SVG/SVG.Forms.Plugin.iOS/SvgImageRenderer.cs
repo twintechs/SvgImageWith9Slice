@@ -39,27 +39,19 @@ namespace SVG.Forms.Plugin.iOS
 
     public override void Draw(CGRect rect)
     {
-        base.Draw(rect);
-    }
-    public override void LayoutSubviews()
-    {
-      base.LayoutSubviews();
+      base.Draw(rect);
 
-      // Redraw SVG to new size.
-      // TODO: Put some shortcut logic to avoid this when rendered size won't change
-      //       (e.g., displaying proportional to horizontal and vertical has grown).
-      var originalSvgSize = _LoadedGraphic.Size;
+      using (CGContext context = UIGraphics.GetCurrentContext ()) 
+      {
+        context.SetAllowsAntialiasing(true);
+        context.SetShouldAntialias(true);
+        context.SetShouldSmoothFonts(true);
 
-      var width = _formsControl.WidthRequest <= 0 ? 100 : _formsControl.WidthRequest;
-      var height = _formsControl.HeightRequest <= 0 ? 100 : _formsControl.HeightRequest;
-      var outputSize = new Size(width, height);
-      var screenScaleFactor = UIScreen.MainScreen.Scale;
-
-      var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, originalSvgSize, outputSize, screenScaleFactor, CreatePlatformImageCanvas);
-
-      var image = finalCanvas.GetImage();
-      var uiImage = image.GetUIImage();
-      Control.Image = uiImage;
+        var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, _LoadedGraphic.Size, new Size(rect.Width, rect.Height), UIScreen.MainScreen.Scale, CreatePlatformImageCanvas);
+        var image = finalCanvas.GetImage();
+        var uiImage = image.GetUIImage();
+        Control.Image = uiImage;
+      }
     }
 
     protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
@@ -79,10 +71,10 @@ namespace SVG.Forms.Plugin.iOS
       if (e.PropertyName == SvgImage.SvgPathProperty.PropertyName
         || e.PropertyName == SvgImage.SvgAssemblyProperty.PropertyName) {
         LoadSvgFromResource();
-        SetNeedsLayout();
+        SetNeedsDisplay();
       }
       else if (e.PropertyName == SvgImage.SvgStretchableInsetsProperty.PropertyName) {
-        SetNeedsLayout();
+        SetNeedsDisplay();
       }
     }
 
