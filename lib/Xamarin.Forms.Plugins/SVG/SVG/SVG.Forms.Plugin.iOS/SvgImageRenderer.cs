@@ -41,16 +41,19 @@ namespace SVG.Forms.Plugin.iOS
     {
       base.Draw(rect);
 
-      using (CGContext context = UIGraphics.GetCurrentContext ()) 
+      if (_formsControl != null)
       {
-        context.SetAllowsAntialiasing(true);
-        context.SetShouldAntialias(true);
-        context.SetShouldSmoothFonts(true);
-
-        var finalCanvas = RenderSvgToCanvas(_LoadedGraphic, _LoadedGraphic.Size, new Size(rect.Width, rect.Height), UIScreen.MainScreen.Scale, CreatePlatformImageCanvas);
-        var image = finalCanvas.GetImage();
-        var uiImage = image.GetUIImage();
-        Control.Image = uiImage;
+        using (CGContext context = UIGraphics.GetCurrentContext ()) 
+        {
+          context.SetAllowsAntialiasing(true);
+          context.SetShouldAntialias(true);
+          context.SetShouldSmoothFonts(true);
+          
+          var finalCanvas = _formsControl.RenderSvgToCanvas(_LoadedGraphic, _LoadedGraphic.Size, new Size(rect.Width, rect.Height), UIScreen.MainScreen.Scale, CreatePlatformImageCanvas);
+          var image = finalCanvas.GetImage();
+          var uiImage = image.GetUIImage();
+          Control.Image = uiImage;
+        }
       }
     }
 
@@ -94,69 +97,5 @@ namespace SVG.Forms.Plugin.iOS
     }
 
     static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new ApplePlatform().CreateImageCanvas(size, scale);
-    IImageCanvas RenderSvgToCanvas(Graphic graphics, Size originalSvgSize, Size outputSize, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
-    {
-      var finalCanvas = createPlatformImageCanvas(outputSize, finalScale);
-
-      if (_formsControl.SvgStretchableInsets != ResizableSvgInsets.Zero)
-      {
-        // Doing a stretchy 9-slice manipulation on the original SVG.
-        // Partition into 9 segments, based on _formsControl.Svg9SliceInsets, storing both original and scaled sizes.
-        var sliceInsets = _formsControl.SvgStretchableInsets;
-        var sliceFramePairs = new[] {
-          ResizableSvgSection.TopLeft,
-          ResizableSvgSection.TopCenter,
-          ResizableSvgSection.TopRight,
-          ResizableSvgSection.CenterLeft,
-          ResizableSvgSection.CenterCenter,
-          ResizableSvgSection.CenterRight,
-          ResizableSvgSection.BottomLeft,
-          ResizableSvgSection.BottomCenter,
-          ResizableSvgSection.BottomRight,
-        }.Select(section => {
-          return Tuple.Create(
-            sliceInsets.GetSection(originalSvgSize, section),
-            sliceInsets.ScaleSection(outputSize, section));
-        }).ToArray();
-
-        foreach (var sliceFramePair in sliceFramePairs) {
-          var sliceImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, CreatePlatformImageCanvas);
-          finalCanvas.DrawImage(sliceImage, sliceFramePair.Item2);
-        }
-      }
-      else
-      {
-        // Typical approach to rendering an SVG; just draw it to the canvas.
-        double proportionalOutputScale;
-        if (outputSize.Height >= outputSize.Width)
-        {
-          proportionalOutputScale = outputSize.Width/_LoadedGraphic.Size.Width;
-        }
-        else
-        {
-          proportionalOutputScale = outputSize.Height/_LoadedGraphic.Size.Height;
-        }
-
-        // Make sure ViewBox is reset to a proportionally-scaled default in case it was previous set by slicing.
-        graphics.ViewBox = new Rect(Point.Zero, graphics.Size / proportionalOutputScale);
-        graphics.Draw(finalCanvas);
-      }
-      return finalCanvas;
-    }
-
-    static IImage RenderSectionToImage(/*this*/ Graphic graphics, Rect sourceFrame, Rect outputFrame, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
-    {
-      var originalSize = graphics.Size;
-      var sectionCanvas = createPlatformImageCanvas(outputFrame.Size, finalScale);
-
-      // Redraw into final version with any scaling between the original and the output slice.
-      var sliceVerticalScale = outputFrame.Height / sourceFrame.Height;
-      var sliceHorizontalScale = outputFrame.Width / sourceFrame.Width;
-      // Potentially setting ViewBox size smaller to enlarge result.
-      graphics.ViewBox = new Rect(sourceFrame.Position, new Size(originalSize.Width / sliceHorizontalScale, originalSize.Height / sliceVerticalScale));
-
-      graphics.Draw(sectionCanvas);
-      return sectionCanvas.GetImage();
-    }
   }
 }
