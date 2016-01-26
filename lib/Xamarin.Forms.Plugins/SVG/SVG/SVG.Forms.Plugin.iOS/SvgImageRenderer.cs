@@ -1,19 +1,13 @@
 ﻿using Xamarin.Forms;
 using SVG.Forms.Plugin.iOS;
 using Xamarin.Forms.Platform.iOS;
-using System.IO;
 using SVG.Forms.Plugin.Abstractions;
 using NGraphics;
 using UIKit;
 using System;
-using System.Linq;
 using CoreGraphics;
 using Foundation;
-using Color = NGraphics.Color;
 using Size = NGraphics.Size;
-using Rect = NGraphics.Rect;
-using Point = NGraphics.Point;
-using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(SVG.Forms.Plugin.Abstractions.SvgImage), typeof(SvgImageRenderer))]
 namespace SVG.Forms.Plugin.iOS
@@ -27,29 +21,31 @@ namespace SVG.Forms.Plugin.iOS
     /// <summary>
     ///   Used for registration with dependency service
     /// </summary>
-    public static void Init()
+    public new static void Init()
     {
       var temp = DateTime.Now;
     }
 
-    private SvgImage _formsControl
-    {
+    private SvgImage _formsControl {
       get { return Element as SvgImage; }
     }
 
+    static double ScreenScale = UIScreen.MainScreen.Scale;
     public override void Draw(CGRect rect)
     {
       base.Draw(rect);
 
       if (_formsControl != null)
       {
-        using (CGContext context = UIGraphics.GetCurrentContext ()) 
+        using (CGContext context = UIGraphics.GetCurrentContext())
         {
           context.SetAllowsAntialiasing(true);
           context.SetShouldAntialias(true);
           context.SetShouldSmoothFonts(true);
-          
-          var finalCanvas = _formsControl.RenderSvgToCanvas(_LoadedGraphic, _LoadedGraphic.Size, new Size(rect.Width, rect.Height), UIScreen.MainScreen.Scale, CreatePlatformImageCanvas);
+
+          var currentGraphic = _formsControl.LoadedGraphic;
+          var outputSize = new Size(rect.Width, rect.Height);
+          var finalCanvas = _formsControl.RenderSvgToCanvas(currentGraphic, currentGraphic.Size, outputSize, ScreenScale, CreatePlatformImageCanvas);
           var image = finalCanvas.GetImage();
           var uiImage = image.GetUIImage();
           Control.Image = uiImage;
@@ -57,45 +53,28 @@ namespace SVG.Forms.Plugin.iOS
       }
     }
 
-    protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
-    {
+    static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new ApplePlatform().CreateImageCanvas(size, scale);
+
+    protected override void OnElementChanged(ElementChangedEventArgs<Image> e) {
       base.OnElementChanged(e);
 
-      if (_formsControl != null)
-      {
-        LoadSvgFromResource();
+      if (e.OldElement != null) {
+        (e.OldElement as SvgImage).OnInvalidate -= HandleInvalidate;
       }
+
+      if (e.NewElement != null) {
+        (e.NewElement as SvgImage).OnInvalidate += HandleInvalidate;
+      }
+
+      SetNeedsDisplay();
     }
 
-    protected override void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
+    /// <summary>
+    /// Handles view invalidate.
+    /// </summary>
+    void HandleInvalidate(object sender, System.EventArgs args)
     {
-      base.OnElementPropertyChanged (sender, e);
-
-      if (e.PropertyName == SvgImage.SvgPathProperty.PropertyName
-        || e.PropertyName == SvgImage.SvgAssemblyProperty.PropertyName) {
-        LoadSvgFromResource();
-        SetNeedsDisplay();
-      }
-      else if (e.PropertyName == SvgImage.SvgStretchableInsetsProperty.PropertyName) {
-        SetNeedsDisplay();
-      }
+      SetNeedsDisplay();
     }
-
-    Graphic _LoadedGraphic { get; set; }
-    void LoadSvgFromResource() {
-      var svgStream = _formsControl.SvgAssembly.GetManifestResourceStream(_formsControl.SvgPath);
-
-      if (svgStream == null)
-      {
-        throw new Exception(string.Format("Error retrieving {0} make sure Build Action is Embedded Resource",
-          _formsControl.SvgPath));
-      }
-
-      var r = new SvgReader(new StreamReader(svgStream));
-
-      _LoadedGraphic = r.Graphic;
-    }
-
-    static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new ApplePlatform().CreateImageCanvas(size, scale);
   }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using NGraphics;
 using Point = NGraphics.Point;
 using Size = NGraphics.Size;
+using System.IO;
 
 namespace SVG.Forms.Plugin.Abstractions
 {
@@ -129,6 +130,8 @@ namespace SVG.Forms.Plugin.Abstractions
 
   public class SvgImage : Image
   {
+    public event EventHandler OnInvalidate;
+
     /// <summary>
     /// The path to the svg file
     /// </summary>
@@ -176,6 +179,59 @@ namespace SVG.Forms.Plugin.Abstractions
       }
     }
 
+    public void Invalidate()
+    {
+      OnInvalidate?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected override void OnBindingContextChanged()
+    {
+      base.OnBindingContextChanged();
+
+      LoadSvgFromResource();
+      Invalidate();
+    }
+
+    protected override void OnPropertyChanged(string propertyName = null)
+    {
+      base.OnPropertyChanged(propertyName);
+
+      if (propertyName == SvgImage.SvgPathProperty.PropertyName
+        || propertyName == SvgImage.SvgAssemblyProperty.PropertyName)
+      {
+        // Changed SVG resource or assembly for SVG resource; load new one.
+        LoadSvgFromResource();
+        Invalidate();
+      }
+      else if (propertyName == SvgImage.SvgStretchableInsetsProperty.PropertyName)
+      {
+        Invalidate();
+      }
+    }
+
+    public Graphic LoadedGraphic { get; set; }
+    public void LoadSvgFromResource()
+    {
+      if (SvgAssembly == null || SvgPath == null)
+      {
+        // Can be called by OnPropertyChanged as values are initially defined.
+        // Don't load anything until we are sure we have enough to do so.
+        return;
+      }
+
+      var svgStream = SvgAssembly.GetManifestResourceStream(SvgPath);
+
+      if (svgStream == null)
+      {
+        throw new Exception(string.Format("Error retrieving {0} make sure Build Action is Embedded Resource",
+          SvgPath));
+      }
+
+      var r = new SvgReader(new StreamReader(svgStream));
+
+      LoadedGraphic = r.Graphic;
+    }
+
     public IImageCanvas RenderSvgToCanvas(Graphic graphics, Size originalSvgSize, Size outputSize, double finalScale, Func<Size, double, IImageCanvas> createPlatformImageCanvas)
     {
       var finalCanvas = createPlatformImageCanvas(outputSize, finalScale);
@@ -201,7 +257,8 @@ namespace SVG.Forms.Plugin.Abstractions
             sliceInsets.ScaleSection(outputSize, section));
         }).ToArray();
 
-        foreach (var sliceFramePair in sliceFramePairs) {
+        foreach (var sliceFramePair in sliceFramePairs)
+        {
           var sliceImage = RenderSectionToImage(graphics, sliceFramePair.Item1, sliceFramePair.Item2, finalScale, createPlatformImageCanvas);
           finalCanvas.DrawImage(sliceImage, sliceFramePair.Item2);
         }
