@@ -20,9 +20,6 @@ namespace SVG.Forms.Plugin.Droid
 
         var graphics = svgReader.Graphic;
 
-        var newWidth = svgImage.WidthRequest == 0 ? 100 : svgImage.WidthRequest;
-        var newHeight = svgImage.HeightRequest == 0 ? 100 : svgImage.HeightRequest;
-
         var scale = 1.0;
 
         if (height >= width)
@@ -38,8 +35,6 @@ namespace SVG.Forms.Plugin.Droid
         graphics.Draw(canvas);
         var image = (BitmapImage)canvas.GetImage();
         result = image.Bitmap;
-
-        //result = SvgFactory.GetBitmap(svgStream, width, height);
       });
 
 			return result;
