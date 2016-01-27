@@ -63,37 +63,6 @@ namespace SVG.Forms.Plugin.Abstractions
       }
     }
 
-    public Rect ScaleSection(Size finalImageSize, ResizableSvgSection section) {
-      // TODO: Decide if the corners scale proportionally (an option with SVGs) or if they always stay the same size (current) or if it is optional.
-      // TODO: Factor in `scaleCorners`, if needed.
-      //public Rect ScaleSection(Size originalSvgSize, Size finalImageSize, ResizableSvgSection section, bool scaleCorners) {
-//      int horizontalScale = finalImageSize.Width / originalSvgSize.Width;
-//      int verticalScale = finalImageSize.Height / originalSvgSize.Height;
-//      Rect originalSection = GetSection(originalSvgSize, section);
-      switch (section) {
-        case ResizableSvgSection.TopLeft:
-          return new Rect(Point.Zero, new Size(Left, Top));
-        case ResizableSvgSection.TopCenter:
-          return new Rect(new Point(Left, 0), new Size(finalImageSize.Width - Right - Left, Top));
-        case ResizableSvgSection.TopRight:
-          return new Rect(new Point(finalImageSize.Width - Right, 0), new Size(Right, Top));
-        case ResizableSvgSection.CenterLeft:
-          return new Rect(new Point(0, Top), new Size(Right, finalImageSize.Height - Bottom - Top));
-        case ResizableSvgSection.CenterCenter:
-          return new Rect(new Point(Left, Top), new Size(finalImageSize.Width - Right - Left, finalImageSize.Height - Bottom - Top));
-        case ResizableSvgSection.CenterRight:
-          return new Rect(new Point(finalImageSize.Width - Right, Top), new Size(Right, finalImageSize.Height - Bottom - Top));
-        case ResizableSvgSection.BottomLeft:
-          return new Rect(new Point(0, finalImageSize.Height - Bottom), new Size(Right, Bottom));
-        case ResizableSvgSection.BottomCenter:
-          return new Rect(new Point(Left, finalImageSize.Height - Bottom), new Size(finalImageSize.Width - Right - Left, Bottom));
-        case ResizableSvgSection.BottomRight:
-          return new Rect(new Point(finalImageSize.Width - Right, finalImageSize.Height - Bottom), new Size(Right, Bottom));
-        default:
-          throw new ArgumentOutOfRangeException("section", "Invalid resizable SVG section");
-      }
-    }
-
     public override bool Equals(object obj)
     {
       if (obj.GetType() != typeof(ResizableSvgInsets)) {
@@ -254,7 +223,7 @@ namespace SVG.Forms.Plugin.Abstractions
         }.Select(section => {
           return Tuple.Create(
             sliceInsets.GetSection(originalSvgSize, section),
-            sliceInsets.ScaleSection(outputSize, section));
+            sliceInsets.GetSection(outputSize, section));
         }).ToArray();
 
         foreach (var sliceFramePair in sliceFramePairs)
