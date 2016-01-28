@@ -36,28 +36,26 @@ namespace SVG.Forms.Plugin.Abstractions
     public ResizableSvgInsets(int vertical, int horizontal) : this(vertical, horizontal, vertical, horizontal) { }
     public ResizableSvgInsets(int allSides) : this(allSides, allSides, allSides, allSides) { }
 
-    // NOTE: Returns actual section from original SVG, not what is used for the ViewBox when slicing
-    //       (which seems to require the original SVG size, or a proportional scale of it for resizing).
-    public Rect GetSection(Size originalSvgSize, ResizableSvgSection section) {
+    public Rect GetSection(Size parentSize, ResizableSvgSection section) {
       switch (section) {
         case ResizableSvgSection.TopLeft:
           return new Rect(Point.Zero, new Size(Left, Top));
         case ResizableSvgSection.TopCenter:
-          return new Rect(new Point(Left, 0), new Size(originalSvgSize.Width - Right - Left, Top));
+          return new Rect(new Point(Left, 0), new Size(parentSize.Width - Right - Left, Top));
         case ResizableSvgSection.TopRight:
-          return new Rect(new Point(originalSvgSize.Width - Right, 0), new Size(Right, Top));
+          return new Rect(new Point(parentSize.Width - Right, 0), new Size(Right, Top));
         case ResizableSvgSection.CenterLeft:
-          return new Rect(new Point(0, Top), new Size(Right, originalSvgSize.Height - Bottom - Top));
+          return new Rect(new Point(0, Top), new Size(Right, parentSize.Height - Bottom - Top));
         case ResizableSvgSection.CenterCenter:
-          return new Rect(new Point(Left, Top), new Size(originalSvgSize.Width - Right - Left, originalSvgSize.Height - Bottom - Top));
+          return new Rect(new Point(Left, Top), new Size(parentSize.Width - Right - Left, parentSize.Height - Bottom - Top));
         case ResizableSvgSection.CenterRight:
-          return new Rect(new Point(originalSvgSize.Width - Right, Top), new Size(Right, originalSvgSize.Height - Bottom - Top));
+          return new Rect(new Point(parentSize.Width - Right, Top), new Size(Right, parentSize.Height - Bottom - Top));
         case ResizableSvgSection.BottomLeft:
-          return new Rect(new Point(0, originalSvgSize.Height - Bottom), new Size(Right, Bottom));
+          return new Rect(new Point(0, parentSize.Height - Bottom), new Size(Right, Bottom));
         case ResizableSvgSection.BottomCenter:
-          return new Rect(new Point(Left, originalSvgSize.Height - Bottom), new Size(originalSvgSize.Width - Right - Left, Bottom));
+          return new Rect(new Point(Left, parentSize.Height - Bottom), new Size(parentSize.Width - Right - Left, Bottom));
         case ResizableSvgSection.BottomRight:
-          return new Rect(new Point(originalSvgSize.Width - Right, originalSvgSize.Height - Bottom), new Size(Right, Bottom));
+          return new Rect(new Point(parentSize.Width - Right, parentSize.Height - Bottom), new Size(Right, Bottom));
         default:
           throw new ArgumentOutOfRangeException("section", "Invalid resizable SVG section");
       }
