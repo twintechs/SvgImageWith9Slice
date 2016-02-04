@@ -103,7 +103,7 @@ namespace SVG.Forms.Plugin.Abstractions
     /// The path to the svg file
     /// </summary>
     public static readonly BindableProperty SvgPathProperty =
-      BindableProperty.Create("SvgPath", typeof(string), typeof(SvgImage), default(string));
+      BindableProperty.Create(nameof(SvgPath), typeof(string), typeof(SvgImage), default(string));
 
     /// <summary>
     /// The path to the svg file
@@ -118,7 +118,7 @@ namespace SVG.Forms.Plugin.Abstractions
     /// The assembly containing the svg file
     /// </summary>
     public static readonly BindableProperty SvgAssemblyProperty =
-      BindableProperty.Create("SvgAssembly", typeof(Assembly), typeof(SvgImage), default(Assembly));
+      BindableProperty.Create(nameof(SvgAssembly), typeof(Assembly), typeof(SvgImage), default(Assembly));
 
     /// <summary>
     /// The assembly containing the svg file
