@@ -100,6 +100,10 @@ namespace SvgSliceSpike {
             };
             slicingSvg.SetBinding(SvgImage.SvgStretchableInsetsProperty, nameof(TestModel.SvgInsets));
             slicingSvg.SetBinding(SvgImage.SvgPathProperty, nameof(TestModel.SvgResourcePath));
+            var svgButton = new Button() {
+                WidthRequest = 300,
+                HeightRequest = 300,
+            };
 
             // The root page of your application
             MainPage = new ContentPage {
@@ -109,10 +113,19 @@ namespace SvgSliceSpike {
                     Children = {
                         resourcePicker,
                         insetSlider,
-                        slicingSvg,
+                        new AbsoluteLayout() {
+                            WidthRequest = 300,
+                            HeightRequest = 300,
+                            Children = {
+                                slicingSvg,
+                                svgButton,
+                            },
+                        },
                     },
                     BindingContext = _ViewModel,
                 },
+            svgButton.Clicked += (sender, e) => {
+                MainPage.DisplayAlert("Tapped!", "SVG button tapped!", "OK");
             };
         }
 
