@@ -95,7 +95,6 @@ namespace SvgSliceSpike {
             };
             insetSlider.SetBinding(Slider.ValueProperty, nameof(TestModel.AllSidesInset), BindingMode.TwoWay);
             var slicingSvg = new SvgImage() {
-                SvgPath = "SvgSliceSpike.Assets.test-button.svg",
                 SvgAssembly = typeof(App).GetTypeInfo().Assembly,
                 WidthRequest = 300,
                 HeightRequest = 300,
@@ -111,7 +110,7 @@ namespace SvgSliceSpike {
             MainPage = new NavigationPage (new ContentPage {
                 Title = "9-Slice SVG Scaling",
                 Content = new StackLayout {
-                    VerticalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Start,
                     HorizontalOptions = LayoutOptions.Center,
                     Children = {
                         insetLabel,
