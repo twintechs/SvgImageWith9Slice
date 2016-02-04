@@ -79,8 +79,10 @@ namespace SvgSliceSpike {
         readonly TestModel _ViewModel;
         public App() {
             _ViewModel = new TestModel();
+            var insetLabel = new Label();
+            insetLabel.SetBinding(Label.TextProperty, nameof(TestModel.SvgInsets), stringFormat: "Stretchable Insets: {0:C2}");
             var resourcePicker = new Picker() {
-                VerticalOptions = LayoutOptions.CenterAndExpand,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
             };
             foreach (var resourceName in TestModel.AvailableResourceNames) {
                 resourcePicker.Items.Add(resourceName);
@@ -106,11 +108,13 @@ namespace SvgSliceSpike {
             };
 
             // The root page of your application
-            MainPage = new ContentPage {
+            MainPage = new NavigationPage (new ContentPage {
+                Title = "9-Slice SVG Scaling",
                 Content = new StackLayout {
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalOptions = LayoutOptions.Center,
                     Children = {
+                        insetLabel,
                         resourcePicker,
                         insetSlider,
                         new AbsoluteLayout() {
@@ -124,6 +128,7 @@ namespace SvgSliceSpike {
                     },
                     BindingContext = _ViewModel,
                 },
+            });
             svgButton.Clicked += (sender, e) => {
                 MainPage.DisplayAlert("Tapped!", "SVG button tapped!", "OK");
             };

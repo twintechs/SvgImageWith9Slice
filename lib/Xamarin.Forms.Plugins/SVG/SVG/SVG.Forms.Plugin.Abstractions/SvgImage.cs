@@ -93,6 +93,11 @@ namespace SVG.Forms.Plugin.Abstractions
         && Left == other.Left;
     }
     #endregion
+
+    public override string ToString()
+        {
+            return string.Format("[{0}, {1}, {2}, {3}]", Top, Right, Bottom, Left);
+        }
   }
 
   public class SvgImage : Image
