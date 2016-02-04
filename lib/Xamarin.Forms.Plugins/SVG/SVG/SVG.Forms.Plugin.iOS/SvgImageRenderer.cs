@@ -31,6 +31,7 @@ namespace SVG.Forms.Plugin.iOS
     }
 
     static double ScreenScale = UIScreen.MainScreen.Scale;
+
     public override void Draw(CGRect rect)
     {
       base.Draw(rect);
@@ -55,14 +56,17 @@ namespace SVG.Forms.Plugin.iOS
 
     static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new ApplePlatform().CreateImageCanvas(size, scale);
 
-    protected override void OnElementChanged(ElementChangedEventArgs<Image> e) {
+    protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
+    {
       base.OnElementChanged(e);
 
-      if (e.OldElement != null) {
+      if (e.OldElement != null)
+      {
         (e.OldElement as SvgImage).OnInvalidate -= HandleInvalidate;
       }
 
-      if (e.NewElement != null) {
+      if (e.NewElement != null)
+      {
         (e.NewElement as SvgImage).OnInvalidate += HandleInvalidate;
       }
 

@@ -8,16 +8,16 @@ using Android.Runtime;
 using NGraphics;
 using Size = NGraphics.Size;
 
-[assembly: ExportRenderer (typeof(SvgImage), typeof(SvgImageRenderer))]
+[assembly: ExportRenderer(typeof(SvgImage), typeof(SvgImageRenderer))]
 namespace SVG.Forms.Plugin.Droid
 {
-    [Preserve(AllMembers = true)]
-    public class SvgImageRenderer : ViewRenderer<SvgImage,ImageView>
-	{
-		public new static void Init ()
-		{
-            var temp = DateTime.Now;
-        }
+  [Preserve(AllMembers = true)]
+  public class SvgImageRenderer : ViewRenderer<SvgImage,ImageView>
+  {
+    public new static void Init()
+    {
+      var temp = DateTime.Now;
+    }
 
     public SvgImageRenderer()
     {
@@ -25,14 +25,15 @@ namespace SVG.Forms.Plugin.Droid
       SetWillNotDraw(willNotDraw: false);
     }
 
-        private SvgImage _formsControl {
-			get {
-				return Element as SvgImage;
-			}
-		}
+    private SvgImage _formsControl {
+      get {
+        return Element as SvgImage;
+      }
+    }
 
     // Don't need to deal with screen scaling on Android.
     const double ScreenScale = 1.0;
+
     public override void Draw(Android.Graphics.Canvas canvas)
     {
       base.Draw(canvas);
@@ -52,11 +53,13 @@ namespace SVG.Forms.Plugin.Droid
     {
       base.OnElementChanged(e);
 
-      if (e.OldElement != null) {
+      if (e.OldElement != null)
+      {
         (e.OldElement as SvgImage).OnInvalidate -= HandleInvalidate;
       }
 
-      if (e.NewElement != null) {
+      if (e.NewElement != null)
+      {
         (e.NewElement as SvgImage).OnInvalidate += HandleInvalidate;
       }
 
@@ -64,30 +67,30 @@ namespace SVG.Forms.Plugin.Droid
 
       if (_formsControl != null)
       {
-        Device.BeginInvokeOnMainThread(() =>
-          {
-            var imageView = new ImageView(Context);
+        Device.BeginInvokeOnMainThread(() => {
+          var imageView = new ImageView(Context);
 
-            imageView.SetScaleType(ImageView.ScaleType.FitXy);
+          imageView.SetScaleType(ImageView.ScaleType.FitXy);
 
-            // TODO: ?Reuse existing Control instead?
-            SetNativeControl(imageView);
-            Invalidate();
-          });
+          // TODO: ?Reuse existing Control instead?
+          SetNativeControl(imageView);
+          Invalidate();
+        });
       }
     }
 
-    public override SizeRequest GetDesiredSize (int widthConstraint, int heightConstraint)
+    public override SizeRequest GetDesiredSize(int widthConstraint, int heightConstraint)
     {
-      return new SizeRequest (new Xamarin.Forms.Size (_formsControl.WidthRequest, _formsControl.WidthRequest));
+      return new SizeRequest(new Xamarin.Forms.Size(_formsControl.WidthRequest, _formsControl.WidthRequest));
     }
-    
+
     static Func<Size, double, IImageCanvas> CreatePlatformImageCanvas = (size, scale) => new AndroidPlatform().CreateImageCanvas(size, scale);
 
     /// <summary>
     /// Handles view invalidate.
     /// </summary>
-    void HandleInvalidate(object sender, System.EventArgs args) {
+    void HandleInvalidate(object sender, System.EventArgs args)
+    {
       Invalidate();
     }
 
@@ -96,9 +99,10 @@ namespace SVG.Forms.Plugin.Droid
     /// </summary>
     /// <param name="pixel"></param>
     /// <returns></returns>
-    private int PixelToDP(int pixel) {
-      var scale =Resources.DisplayMetrics.Density;
-      return (int) ((pixel * scale) + 0.5f);
+    private int PixelToDP(int pixel)
+    {
+      var scale = Resources.DisplayMetrics.Density;
+      return (int)((pixel * scale) + 0.5f);
     }
-	}
+  }
 }
